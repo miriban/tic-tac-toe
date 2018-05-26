@@ -1,3 +1,4 @@
 .DS_Store
 .idea
 app/views/cache/*
+!app/views/cache/index.html
