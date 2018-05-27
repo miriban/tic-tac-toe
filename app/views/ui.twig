@@ -6,73 +6,132 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <style>
-        .container
-        {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            width:150px;
-            height:auto;
+        @font-face {
+            font-family: 'Pacifico';
+            src: url('/static/fonts/Pacifico-Regular.eot');
+            src: url('/static/fonts/Pacifico-Regular.eot?#iefix') format('embedded-opentype'),
+            url('/static/fonts/Pacifico-Regular.ttf')  format('truetype'),
+            url('/static/fonts/Pacifico-Regular.svg#svgFontName') format('svg');
         }
 
-        form
-        {
-            display: flex;
-            flex-direction: column;
-            float:left;
-            width:50px;
-            height:50px;
-            justify-content: center;
-            align-items: center;
-        }
+        body {padding:50px 0;}
+        .board {text-align: center;}
+        .controls {padding: 20px;}
 
-        button
+        .board .col
         {
-            width:100%;
-            height:100%;
-            font-size: 25px;
-            cursor: pointer;
-        }
-
-        .box
-        {
-            font-size: 25px;
-        }
-
-        .controls
-        {
-            width:200px;
-            height:100px;
             padding:20px;
+            font-size: 100px;
+            border:1px solid #000;
+            font-family: 'Pacifico', cursive;
+            height: 200px;
         }
-
-        .controls  button
-        {
-            width: auto;
-        }
+        .pointer {cursor: pointer;}
+        .blue {color: blue;}
+        .red { color: red;}
+        .modal-content{ padding: 20px;}
     </style>
 </head>
 <body>
-    {{ message }}
-    <h1>This is Tic Tac Toe Game!</h1>
-    <div class="controls">
-        <form method="post"><button type="submit" name="reset">Reset</button></form>
+<div class="container">
+    <div class="row justify-content-center">
+        <h1>Tic Tac Toe</h1>
     </div>
-    <div class="container">
+    <div class="row controls justify-content-center">
+        <nav class="nav nav-pills nav-justified">
+            <a class="nav-link active pointer" onclick="resetGame()">Reset Game</a>
+        </nav>
+    </div>
+    <div class="board">
         {% for row_key, row in board %}
-            {% for col_key, col in row %}
-                <form method="POST" row="{{ row_key }}" col="{{ col_key }}">
+            <div class="row justify-content-center">
+                {% for col_key, col in row %}
                     {% if col == "" %}
-                        <input type="text" name="row" value="{{ row_key }}" hidden/>
-                        <input type="text" name="column" value="{{ col_key }}" hidden/>
-                        <button type="submit"></button>
+                        <div class="col pointer" onclick="move({{ row_key }}, {{ col_key }})">{{ col }}</div>
+                    {% elseif col == "X" %}
+                        <div class="col blue">{{ col }}</div>
                     {% else %}
-                        <div class="box">{{ col }}</div>
+                        <div class="col red">{{ col }}</div>
                     {% endif %}
-                </form>
-            {% endfor %}
+
+                {% endfor %}
+            </div>
         {% endfor %}
     </div>
+</div>
+<div class="modal fade" id="message-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+<!-- scripts -->
+<script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    function resetGame()
+    {
+        $.ajax({
+            type: "POST",
+            url: "/",
+            data: {reset: true},
+            success: function(response)
+            {
+                drawBoard(JSON.parse(response).board);
+            }
+        });
+    }
+
+    function move(row, col)
+    {
+        $.ajax({
+            type: "POST",
+            url: "/",
+            data: {row: row, column: col},
+            success: function(response)
+            {
+                var response = JSON.parse(response);
+                drawBoard(response.board);
+
+                if("message" in response)
+                {
+                    $("#message-modal .modal-content").text(response.message);
+                    $('#message-modal').modal("show");
+                }
+            }
+        });
+    }
+
+    function drawBoard(board)
+    {
+        var elem = $(".board");
+        var html = "";
+
+        for(var i=0; i<board.length; i++)
+        {
+            html += '<div class="row justify-content-center">';
+            for(var j=0; j<board[i].length; j++)
+            {
+                if(board[i][j] === "")
+                {
+                    html += '<div class="col pointer" onclick="move(' + i + ', ' + j + ')">' + board[i][j] + '</div>';
+                }
+                else if(board[i][j] === "X")
+                {
+                    html += '<div class="col blue">' + board[i][j] + '</div>';
+                }
+                else
+                {
+                    html += '<div class="col red">' + board[i][j] + '</div>';
+                }
+            }
+            html += '</div>';
+        }
+
+        elem.html(html);
+    }
+</script>
 </body>
 </html>

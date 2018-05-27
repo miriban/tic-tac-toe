@@ -116,7 +116,7 @@ class GameController
             $this->session->savePlayer($this->switchPlayer());
         }
 
-        $this->get($this->getMessage());
+        $this->postResponse();
     }
 
     /**
@@ -132,24 +132,27 @@ class GameController
     }
 
     /**
-     * return a message if a player wins the game or the game is over
+     * return a response as a json string that contains a message and a board
      *
-     * @return string
+     * @return void
      */
-    private function getMessage()
+    private function postResponse()
     {
-        $winner = $this->game->getWinner();
-        if($winner !== "")
+        $data = [];
+
+        $data['board'] = $this->game->getBoard();
+
+        // check for winner
+        if(($winner = $this->game->getWinner()) !== "")
         {
-            return $winner . " wins!";
+            $data['message'] = $winner . " wins the game!";
+        }
+        else if ($this->game->isGameOver())
+        {
+            $data['message'] = "The Game is over!";
         }
 
-        if($this->game->isGameOver())
-        {
-            return "game over!";
-        }
-
-        return "";
+        echo json_encode($data);
     }
 
 }
