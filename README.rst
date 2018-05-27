@@ -8,8 +8,8 @@ same computer.
 How to start development environment
 ####################################
 
-- Setup project environment by type the following command `docker-compose build`
-- Start the project using the following command `docker-compose up`
+- Setup project environment by type the following command :code:`docker-compose build`
+- Start the project using the following command :code:`docker-compose up`
 - Enjoy the game
 
 Run Unit Tests
